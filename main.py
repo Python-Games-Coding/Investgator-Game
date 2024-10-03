@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageSequence
+from random import randint
 
 class CharacterSelection(tk.Tk):
     def __init__(self):
@@ -108,13 +109,15 @@ class CharacterSelection(tk.Tk):
             if index != 0:
                 self.after(100, update_frame, index)
             else:
-                self.after(1, self.show_blank_window)  # 5秒后显示空白页面
+                self.after(1, self.show_blank_window3)  # 5秒后显示空白页面
 
         update_frame(0)
 
         # 显示 "Loading..."
         loading_label = tk.Label(self, text="Loading...", font=("Arial", 16), bg='red', fg='white')
+        loading_label2 = tk.Label(self, text="All for one and ALL-igator!", font=("Arial", 16), bg='red', fg='white')
         loading_label.pack(pady=20)
+        loading_label2.pack(pady=20)
 
     def confirm_selection(self):
         if self.player is not None:
@@ -127,6 +130,46 @@ class CharacterSelection(tk.Tk):
             widget.destroy()
         self.configure(bg='SystemButtonFace')  # 恢复默认背景颜色
         self.title("Game")
+
+    def start_game(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+        self.configure(bg='green')
+        self.title("Creating Game")
+
+        creating_label = tk.Label(self, text="Creating Game", font=("Arial", 16), bg='green', fg='white')
+        creating_label.pack(pady=20)
+
+        self.after(randint(1000, 7000), self.show_there_we_go)  # 1-7秒后显示 "There We Go!"
+
+    def show_there_we_go(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+        self.configure(bg='green')
+        self.title("There We Go!")
+
+        there_we_go_label = tk.Label(self, text="There We Go!", font=("Arial", 16), bg='green', fg='white')
+        there_we_go_label.pack(pady=20)
+
+        self.after(500, self.show_blank_window2)  # 0.5秒后显示空白页面
+
+    def show_blank_window2(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+        self.configure(bg='SystemButtonFace')  # 恢复默认背景颜色
+        self.title("Game")
+
+    def show_blank_window3(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+        self.configure(bg='SystemButtonFace')  # 恢复默认背景颜色
+        self.title("Game")
+        start_button = tk.Button(self, text="Start Game", command=self.start_game)
+        player_label = tk.Label(self, text="Character: " + self.player, font=("Arial", 16), bg='SystemButtonFace', fg='black')
+        quit_button = tk.Button(self, text="Quit Game", command=self.quit)
+        start_button.pack(pady=20)
+        player_label.pack(pady=20)
+        quit_button.pack(pady=20)
 
 if __name__ == "__main__":
     app = CharacterSelection()
