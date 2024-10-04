@@ -3,6 +3,15 @@ from tkinter import messagebox
 from PIL import Image, ImageTk, ImageSequence
 from random import randint
 
+global player_died, health, boss_health, boss_died, little_boss_health, little_boss_died, level, level_complete
+player_died = False
+health = 300
+boss_health = 1000
+boss_died = False
+little_boss_health = 300
+little_boss_died = False
+level = 8
+level_complete = True
 class CharacterSelection(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -18,8 +27,8 @@ class CharacterSelection(tk.Tk):
         label = tk.Label(self, text="Please Select A Character", font=("Arial", 14))
         label.grid(row=0, columnspan=5, pady=10)
         a = 1
-        text = 'Daryl'
-        for i in range(5):
+        text = 'Marsha'
+        for i in range(6):
             img = Image.open(f"Characters/character_{i+1}.png")  # 更新图片路径
             self.images.append(img)  # 保存原始图片
             photo = ImageTk.PhotoImage(img.resize((50, 50), Image.LANCZOS))
@@ -28,7 +37,7 @@ class CharacterSelection(tk.Tk):
             btn.grid(row=1, column=i, padx=10, pady=10, sticky="nsew")
             self.buttons.append(btn)
             if a == 1:
-                text = 'Daryl'
+                text = 'Marsha'
             elif a == 2:
                 text = 'Mango'
             elif a == 3:
@@ -37,6 +46,8 @@ class CharacterSelection(tk.Tk):
                 text = 'Cilantro'
             elif a == 5:
                 text = 'RoboBrash'
+            elif a == 6:
+                text = 'Bongo'
 
             # 在按钮上添加文字
             text_label = tk.Label(self, text=text, bg="white")
@@ -56,6 +67,8 @@ class CharacterSelection(tk.Tk):
 
     def resize_images(self, event):
         for i, btn in enumerate(self.buttons):
+            if not btn.winfo_exists():
+                continue  # 如果按钮不存在，跳过
             # 计算新的宽度和高度，保持图片比例
             img = self.images[i]
             aspect_ratio = img.width / img.height
@@ -74,7 +87,7 @@ class CharacterSelection(tk.Tk):
                 btn.config(state="normal", highlightbackground="black", highlightthickness=0)
         ind = index + 1
         if ind == 1:
-            self.player = 'Daryl'
+            self.player = 'Marsha'
         elif ind == 2:
             self.player = 'Mango'
         elif ind == 3:
@@ -83,6 +96,8 @@ class CharacterSelection(tk.Tk):
             self.player = 'Cilantro'
         elif ind == 5:
             self.player = 'RoboBrash'
+        elif ind == 6:
+            self.player = 'Bongo'
         
         self.unbind("<Configure>")  # 解除绑定以防止在销毁按钮后调用 resize_images
 
@@ -92,7 +107,7 @@ class CharacterSelection(tk.Tk):
             widget.destroy()
 
         # 设置背景颜色为红色
-        self.configure(bg='red')
+        self.configure(bg='gray')
 
         # 加载并显示 GIF
         gif_path = "ProgressBar/ProgressBar.gif"
@@ -165,12 +180,46 @@ class CharacterSelection(tk.Tk):
         self.configure(bg='SystemButtonFace')  # 恢复默认背景颜色
         self.title("Game")
         start_button = tk.Button(self, text="Start Game", command=self.start_game)
-        player_label = tk.Label(self, text="Character: " + self.player, font=("Arial", 16), bg='SystemButtonFace', fg='black')
+        player_label = tk.Label(self, text="Character: " + str(self.player), font=("Arial", 16), bg='SystemButtonFace', fg='black')
         quit_button = tk.Button(self, text="Quit Game", command=self.quit)
         start_button.pack(pady=20)
         player_label.pack(pady=20)
         quit_button.pack(pady=20)
 
+    def show_blank_window4(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+        self.configure(bg='SystemButtonFace')  # 恢复默认背景颜色
+        self.title("Game")
+
+    def level_complete(self):
+        level_complete = True
+        for widget in self.winfo_children():
+            widget.destroy()
+        self.configure(bg='Green')  # 恢复默认背景颜色
+        self.title("Game")
+        global level
+        if int(level) < 8:
+            level_complete_label = tk.Label(self, text="Level Complete", font=("Arial", 16), bg='Green', fg='White')
+            level_complete_label.pack(pady=20)
+            next_level_button = tk.Button(self, text="Next Level", command=self.start_game)
+            go_to_SUIT_button = tk.Button(self, text="Go to S.U.I.T. Headquarters", command=self.show_blank_window4)
+            next_level_button.pack(pady=20)
+            go_to_SUIT_button.pack(pady=20)
+            level += 1
+        else:
+            level_complete_label = tk.Label(self, text="Congratulations! You have completed the game!\nPlease Choose A Option Below", font=("Arial", 16), bg='Green', fg='White')
+            level_complete_label.pack(pady=20)
+            win_level_button = tk.Button(self, text="Back to Menu", command=self.show_blank_window3)
+            go_to_SUIT_button = tk.Button(self, text="Go to S.U.I.T. Headquarters", command=self.show_blank_window4)
+            play_again_button = tk.Button(self, text="Play Again", command=self.start_game)
+            quit_button = tk.Button(self, text="Quit Game", command=self.quit)
+            win_level_button.pack(pady=20)
+            go_to_SUIT_button.pack(pady=20)
+            play_again_button.pack(pady=20)
+            quit_button.pack(pady=20)
+
 if __name__ == "__main__":
     app = CharacterSelection()
+    app.level_complete()
     app.mainloop()
