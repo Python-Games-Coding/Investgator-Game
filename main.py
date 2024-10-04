@@ -2,16 +2,18 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageSequence
 from random import randint
+import os
 
 global player_died, health, boss_health, boss_died, little_boss_health, little_boss_died, level, level_complete
 player_died = False
-health = 300
+health = 350
 boss_health = 1000
 boss_died = False
 little_boss_health = 300
 little_boss_died = False
-level = 8
-level_complete = True
+level = 1
+level_complete = False
+
 class CharacterSelection(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -23,17 +25,16 @@ class CharacterSelection(tk.Tk):
         self.create_widgets()
 
     def create_widgets(self):
-        # 添加提示信息标签
         label = tk.Label(self, text="Please Select A Character", font=("Arial", 14))
         label.grid(row=0, columnspan=5, pady=10)
         a = 1
         text = 'Marsha'
         for i in range(6):
-            img = Image.open(f"Characters/character_{i+1}.png")  # 更新图片路径
-            self.images.append(img)  # 保存原始图片
+            img = Image.open(f"textures/characters/character_{i+1}.png")
+            self.images.append(img)
             photo = ImageTk.PhotoImage(img.resize((50, 50), Image.LANCZOS))
             btn = tk.Button(self, image=photo, command=lambda i=i: self.select_character(i))
-            btn.image = photo  # Keep a reference to avoid garbage collection
+            btn.image = photo
             btn.grid(row=1, column=i, padx=10, pady=10, sticky="nsew")
             self.buttons.append(btn)
             if a == 1:
@@ -49,7 +50,6 @@ class CharacterSelection(tk.Tk):
             elif a == 6:
                 text = 'Bongo'
 
-            # 在按钮上添加文字
             text_label = tk.Label(self, text=text, bg="white")
             text_label.grid(row=1, column=i, padx=10, pady=10, sticky="s")
             a += 1
@@ -68,16 +68,15 @@ class CharacterSelection(tk.Tk):
     def resize_images(self, event):
         for i, btn in enumerate(self.buttons):
             if not btn.winfo_exists():
-                continue  # 如果按钮不存在，跳过
-            # 计算新的宽度和高度，保持图片比例
+                continue
             img = self.images[i]
             aspect_ratio = img.width / img.height
-            new_width = max(min(event.width // 5, event.height // 3) - 20, 150)  # 设置最小宽度为 150
+            new_width = max(min(event.width // 5, event.height // 3) - 20, 150)
             new_height = int(new_width / aspect_ratio)
             resized_img = img.resize((new_width, new_height), Image.LANCZOS)
             photo = ImageTk.PhotoImage(resized_img)
             btn.config(image=photo)
-            btn.image = photo  # Keep a reference to avoid garbage collection
+            btn.image = photo
 
     def select_character(self, index):
         for i, btn in enumerate(self.buttons):
@@ -99,18 +98,14 @@ class CharacterSelection(tk.Tk):
         elif ind == 6:
             self.player = 'Bongo'
         
-        self.unbind("<Configure>")  # 解除绑定以防止在销毁按钮后调用 resize_images
+        self.unbind("<Configure>")
 
     def show_loading_screen(self):
-        # 清除当前窗口内容
         for widget in self.winfo_children():
             widget.destroy()
-
-        # 设置背景颜色为红色
         self.configure(bg='gray')
 
-        # 加载并显示 GIF
-        gif_path = "ProgressBar/ProgressBar.gif"
+        gif_path = "textures/gui/ProgressBar.gif"
         gif = Image.open(gif_path)
         frames = [ImageTk.PhotoImage(frame) for frame in ImageSequence.Iterator(gif)]
 
@@ -124,11 +119,10 @@ class CharacterSelection(tk.Tk):
             if index != 0:
                 self.after(100, update_frame, index)
             else:
-                self.after(1, self.show_blank_window3)  # 5秒后显示空白页面
+                self.after(1, self.show_blank_window3)
 
         update_frame(0)
 
-        # 显示 "Loading..."
         loading_label = tk.Label(self, text="Loading...", font=("Arial", 16), bg='red', fg='white')
         loading_label2 = tk.Label(self, text="All for one and ALL-igator!", font=("Arial", 16), bg='red', fg='white')
         loading_label.pack(pady=20)
@@ -143,7 +137,7 @@ class CharacterSelection(tk.Tk):
     def show_blank_window(self):
         for widget in self.winfo_children():
             widget.destroy()
-        self.configure(bg='SystemButtonFace')  # 恢复默认背景颜色
+        self.configure(bg='SystemButtonFace')
         self.title("Game")
 
     def start_game(self):
@@ -155,7 +149,7 @@ class CharacterSelection(tk.Tk):
         creating_label = tk.Label(self, text="Creating Game", font=("Arial", 16), bg='green', fg='white')
         creating_label.pack(pady=20)
 
-        self.after(randint(1000, 7000), self.show_there_we_go)  # 1-7秒后显示 "There We Go!"
+        self.after(randint(1000, 7000), self.show_there_we_go)
 
     def show_there_we_go(self):
         for widget in self.winfo_children():
@@ -166,18 +160,57 @@ class CharacterSelection(tk.Tk):
         there_we_go_label = tk.Label(self, text="There We Go!", font=("Arial", 16), bg='green', fg='white')
         there_we_go_label.pack(pady=20)
 
-        self.after(500, self.show_blank_window2)  # 0.5秒后显示空白页面
+        self.after(500, self.show_blank_window2)
 
     def show_blank_window2(self):
         for widget in self.winfo_children():
             widget.destroy()
-        self.configure(bg='SystemButtonFace')  # 恢复默认背景颜色
+        self.configure(bg='SystemButtonFace')
         self.title("Game")
+
+        self.health_label = tk.Label(self)
+        self.health_label.place(x=10, y=10)
+
+        self.update_health_image()
+
+    def update_health_image(self):
+        global health
+        health_image_path = f"textures/gui/health{health // 50}.png"
+    
+        if health <= 0:
+            self.respawn()
+            return
+
+        health_img = Image.open(health_image_path)
+        health_photo = ImageTk.PhotoImage(health_img)
+        self.health_label.config(image=health_photo)
+        self.health_label.image = health_photo
+
+        # 只有在 health 大于 0 时才继续减少
+        if health > 0:
+            self.after(1000, self.update_health_image)
+
+    def respawn(self):
+        global health
+        health = 350
+        for widget in self.winfo_children():
+            widget.destroy()
+        self.configure(bg='SystemButtonFace')
+        self.title("You Died")
+        level_complete_label = tk.Label(self, text="You Died", font=("Arial", 16), bg='SystemButtonFace', fg='Black')
+        win_level_button = tk.Button(self, text="Back to Menu", command=self.show_blank_window3)
+        go_to_SUIT_button = tk.Button(self, text="Go to S.U.I.T. Headquarters", command=self.show_blank_window4)
+        play_again_button = tk.Button(self, text="Play Again", command=self.start_game)
+        quit_button = tk.Button(self, text="Quit Game", command=self.quit)
+        win_level_button.pack(pady=20)
+        go_to_SUIT_button.pack(pady=20)
+        play_again_button.pack(pady=20)
+        quit_button.pack(pady=20)
 
     def show_blank_window3(self):
         for widget in self.winfo_children():
             widget.destroy()
-        self.configure(bg='SystemButtonFace')  # 恢复默认背景颜色
+        self.configure(bg='SystemButtonFace')
         self.title("Game")
         start_button = tk.Button(self, text="Start Game", command=self.start_game)
         player_label = tk.Label(self, text="Character: " + str(self.player), font=("Arial", 16), bg='SystemButtonFace', fg='black')
@@ -189,14 +222,13 @@ class CharacterSelection(tk.Tk):
     def show_blank_window4(self):
         for widget in self.winfo_children():
             widget.destroy()
-        self.configure(bg='SystemButtonFace')  # 恢复默认背景颜色
+        self.configure(bg='SystemButtonFace')
         self.title("Game")
 
     def level_complete(self):
-        level_complete = True
         for widget in self.winfo_children():
             widget.destroy()
-        self.configure(bg='Green')  # 恢复默认背景颜色
+        self.configure(bg='Green')
         self.title("Game")
         global level
         if int(level) < 8:
@@ -221,5 +253,4 @@ class CharacterSelection(tk.Tk):
 
 if __name__ == "__main__":
     app = CharacterSelection()
-    app.level_complete()
     app.mainloop()
