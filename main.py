@@ -1,18 +1,9 @@
 import tkinter as tk
+from core import log, verables, SimpleButton
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageSequence
 from random import randint
 import os
-
-global player_died, health, boss_health, boss_died, little_boss_health, little_boss_died, level, level_complete
-player_died = False
-health = 350
-boss_health = 1000
-boss_died = False
-little_boss_health = 300
-little_boss_died = False
-level = 1
-level_complete = False
 
 class CharacterSelection(tk.Tk):
     def __init__(self):
@@ -23,6 +14,7 @@ class CharacterSelection(tk.Tk):
         self.buttons = []
         self.images = []
         self.create_widgets()
+        log.PrintLn('Game Start')
 
     def create_widgets(self):
         label = tk.Label(self, text="Please Select A Character", font=("Arial", 14))
@@ -148,7 +140,7 @@ class CharacterSelection(tk.Tk):
 
         creating_label = tk.Label(self, text="Creating Game", font=("Arial", 16), bg='green', fg='white')
         creating_label.pack(pady=20)
-
+        log.PrintLn('Creating game')
         self.after(randint(1000, 7000), self.show_there_we_go)
 
     def show_there_we_go(self):
@@ -170,14 +162,12 @@ class CharacterSelection(tk.Tk):
 
         self.health_label = tk.Label(self)
         self.health_label.place(x=10, y=10)
-
         self.update_health_image()
 
     def update_health_image(self):
-        global health
-        health_image_path = f"textures/gui/health{health // 50}.png"
+        health_image_path = f"textures/gui/health{verables.health // 50}.png"
     
-        if health <= 0:
+        if verables.health <= 0:
             self.respawn()
             return
 
@@ -187,12 +177,11 @@ class CharacterSelection(tk.Tk):
         self.health_label.image = health_photo
 
         # 只有在 health 大于 0 时才继续减少
-        if health > 0:
+        if verables.health > 0:
             self.after(1000, self.update_health_image)
 
     def respawn(self):
-        global health
-        health = 350
+        verables.health = 350
         for widget in self.winfo_children():
             widget.destroy()
         self.configure(bg='SystemButtonFace')
@@ -215,6 +204,7 @@ class CharacterSelection(tk.Tk):
         start_button = tk.Button(self, text="Start Game", command=self.start_game)
         player_label = tk.Label(self, text="Character: " + str(self.player), font=("Arial", 16), bg='SystemButtonFace', fg='black')
         quit_button = tk.Button(self, text="Quit Game", command=self.quit)
+        log.PrintLn('Loaded Main Page')
         start_button.pack(pady=20)
         player_label.pack(pady=20)
         quit_button.pack(pady=20)
@@ -230,15 +220,14 @@ class CharacterSelection(tk.Tk):
             widget.destroy()
         self.configure(bg='Green')
         self.title("Game")
-        global level
-        if int(level) < 8:
+        if int(verables.level) < 8:
             level_complete_label = tk.Label(self, text="Level Complete", font=("Arial", 16), bg='Green', fg='White')
             level_complete_label.pack(pady=20)
             next_level_button = tk.Button(self, text="Next Level", command=self.start_game)
             go_to_SUIT_button = tk.Button(self, text="Go to S.U.I.T. Headquarters", command=self.show_blank_window4)
             next_level_button.pack(pady=20)
             go_to_SUIT_button.pack(pady=20)
-            level += 1
+            verables.level += 1
         else:
             level_complete_label = tk.Label(self, text="Congratulations! You have completed the game!\nPlease Choose A Option Below", font=("Arial", 16), bg='Green', fg='White')
             level_complete_label.pack(pady=20)
@@ -253,4 +242,5 @@ class CharacterSelection(tk.Tk):
 
 if __name__ == "__main__":
     app = CharacterSelection()
+    log.PrintLn('Init')
     app.mainloop()
