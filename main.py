@@ -9,7 +9,7 @@ class CharacterSelection(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Game")
-        self.geometry("1000x750")
+        self.geometry("1300x800")
         self.player = None
         self.buttons = []
         self.images = []
@@ -155,14 +155,92 @@ class CharacterSelection(tk.Tk):
         self.after(500, self.show_blank_window2)
 
     def show_blank_window2(self):
+        log.PrintLn(self.player + 'Joined The Game')
         for widget in self.winfo_children():
             widget.destroy()
         self.configure(bg='SystemButtonFace')
         self.title("Game")
-
         self.health_label = tk.Label(self)
         self.health_label.place(x=10, y=10)
+        # 显示角色图片
+        self.character_label = tk.Label(self)
+        self.character_label.place(x=50, y=300)  # 初始位置
+        self.character_image_path = f"textures/player/{self.player}/stick-L1.gif"
+        self.character_image = Image.open(self.character_image_path)
+        self.character_photo = ImageTk.PhotoImage(self.character_image)
+        self.character_label.config(image=self.character_photo)
+        self.character_label.image = self.character_photo
+
+        self.character_x = 50
+        self.character_y = 300
+        self.velocity_y = 0  # 下落速度
+        self.is_jumping = False
+        self.is_moving_left = False
+        self.is_moving_right = False
+
+        self.bind("<KeyPress>", self.on_key_press)
+        self.bind("<KeyRelease>", self.on_key_release)
+
+        self.update_gravity()
         self.update_health_image()
+        self.update_movement() 
+
+    def update_gravity(self):
+        # 重力模拟，小人下落直到接触地面
+        self.velocity_y += 2  # 模拟重力
+        self.character_y += self.velocity_y
+
+        if self.character_y >= 800:  # 假设地面是 y = 400
+            self.character_y = 800
+            self.velocity_y = 0
+            self.is_jumping = False
+
+        self.character_label.place(x=self.character_x, y=self.character_y)
+    
+        self.after(50, self.update_gravity)  # 每50ms更新一次
+
+    def on_key_press(self, event):
+        if event.keysym == "a":
+            self.is_moving_left = True
+        elif event.keysym == "d":
+            self.is_moving_right = True
+        elif event.keysym == "space" and not self.is_jumping:
+            self.is_jumping = True
+            self.velocity_y = -20  # 跳跃力度
+
+    def on_key_release(self, event):
+        if event.keysym == "a":
+            self.is_moving_left = False
+        elif event.keysym == "d":
+            self.is_moving_right = False
+
+    def update_movement(self):
+        if self.is_moving_left:
+            self.play_animation("L")  # 播放左移动画
+        elif self.is_moving_right:  # 向右移动
+            self.play_animation("R")  # 播放右移动画
+
+        # 更新角色位置
+        self.character_label.place(x=self.character_x, y=self.character_y)
+
+        # 每 50 毫秒更新一次移动状态
+        self.after(1, self.update_movement)
+
+    def play_animation(self, direction):
+        frames = [f"stick-{direction}1.gif", f"stick-{direction}2.gif", f"stick-{direction}3.gif"]
+        for frame in frames:
+            img = Image.open(f"textures/player/{self.player}/{frame}")
+            photo = ImageTk.PhotoImage(img)
+            self.character_label.config(image=photo)
+            self.character_label.image = photo
+            self.update()  # 更新显示
+            self.after(100)  # 每帧动画延时 100ms
+
+            if direction == "L":
+                self.character_x -= 5  # 向左移动
+            elif direction == "R":
+                self.character_x += 5  # 向右移动
+
 
     def update_health_image(self):
         health_image_path = f"textures/gui/health{verables.health // 50}.png"
