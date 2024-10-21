@@ -155,7 +155,7 @@ class CharacterSelection(tk.Tk):
         self.after(500, self.show_blank_window2)
 
     def show_blank_window2(self):
-        log.PrintLn(self.player + 'Joined The Game')
+        log.PrintLn(self.player + ' Joined The Game')
         for widget in self.winfo_children():
             widget.destroy()
         self.configure(bg='SystemButtonFace')
@@ -190,10 +190,14 @@ class CharacterSelection(tk.Tk):
         self.velocity_y += 2  # 模拟重力
         self.character_y += self.velocity_y
 
-        if self.character_y >= 800:  # 假设地面是 y = 400
-            self.character_y = 800
+        if self.character_y >= 765:  # 假设地面是 y = 400
+            self.character_y = 765
             self.velocity_y = 0
             self.is_jumping = False
+        if self.character_x == 1000:
+            self.character_x = 1000
+        elif self.character_x == 0:
+            self.character_x = 0
 
         self.character_label.place(x=self.character_x, y=self.character_y)
     
@@ -237,9 +241,9 @@ class CharacterSelection(tk.Tk):
             self.after(100)  # 每帧动画延时 100ms
 
             if direction == "L":
-                self.character_x -= 5  # 向左移动
+                self.character_x -= 9  # 向左移动
             elif direction == "R":
-                self.character_x += 5  # 向右移动
+                self.character_x += 9  # 向右移动
 
 
     def update_health_image(self):
@@ -268,7 +272,7 @@ class CharacterSelection(tk.Tk):
         win_level_button = tk.Button(self, text="Back to Menu", command=self.show_blank_window3)
         go_to_SUIT_button = tk.Button(self, text="Go to S.U.I.T. Headquarters", command=self.show_blank_window4)
         play_again_button = tk.Button(self, text="Play Again", command=self.start_game)
-        quit_button = tk.Button(self, text="Quit Game", command=self.quit)
+        quit_button = tk.Button(self, text="Quit Game", command=self.quit) 
         win_level_button.pack(pady=20)
         go_to_SUIT_button.pack(pady=20)
         play_again_button.pack(pady=20)
