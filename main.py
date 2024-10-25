@@ -19,6 +19,18 @@ class CharacterSelection(tk.Tk):
             self.boss_name = 'howdino'
         elif verables.level == 2:
             self.boss_name = 'Crackerdile'
+        elif verables.level == 3:
+            self.boss_name = 'Waffledile'
+        elif verables.level == 4:
+            self.boss_name = 'Dong'
+        elif verables.level == 5:
+            self.boss_name = 'Rocodile'
+        elif verables.level == 6:
+            self.boss_name = 'Savana'
+        elif verables.level == 7:
+            self.boss_name = 'Bill-N-Dollaz'
+        elif verables.level == 8:
+            self.boss_name = 'Phillip'
         log.PrintLn('Game Start')
 
     def create_widgets(self):
