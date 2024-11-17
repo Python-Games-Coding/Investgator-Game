@@ -203,7 +203,7 @@ class CharacterSelection(tk.Tk):
         self.update_movement()
 
         # 显示Boss并开始移动
-        self.show_boss()
+        self.after(randint(100000, 1000000), self.show_boss())
 
     def show_boss(self):
         # 显示Boss图片
